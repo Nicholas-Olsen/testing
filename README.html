@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>다음 할당량 예측</title>
+  <style>
+    body {
+      background-color: #333333;
+      color: #99ff99;
+      font-family: Sans-serif;
+      font-weight: bold;
+    }
+    fieldset {
+      border: 5px solid #33ff33;
+      padding: 5px;
+      max-width: 500px;
+      margin: 30px auto;
+      border-radius: 10px;
+    }
+    legend {
+      font-size: 2.4em;
+      color: #3FFF48;
+    }
+    label { font-size: 17px; }
+    input[type="checkbox"] {
+      transform: scale(1.5);
+      margin: 9px;
+    }
+    label.left-gap {
+      margin-left: 20px; 
+    }
+    input[type="number"] {
+      font-family: sans-serif;
+      font-size: 20px;
+      background-color: #faffff;
+      color: #333333;
+      width: 26%;
+      font-weight: bold;
+      height: 30px;
+      margin-top: 10px;
+    }
+    .highlight-label {
+      font-weight: bold;
+      color: #000;
+    }
+    select {
+      font-family: sans-serif;
+      font-size: 16px;
+      padding: 5px;
+      border: 1px solid #33ff33;
+      background-color: #333333;
+      color: #ffffff;
+      width: 35%;
+      height: 40px;
+      font-weight: bold;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #66ff66;
+      color: #1C1C1C;
+      font-size: 1.9em;
+      font-weight: bold;
+      padding: 22px 50px;
+      border: none;
+      cursor: pointer;
+      display: inline-block;
+      margin: 15px 10px 20px 10px;
+      border-radius: 15px;
+    }
+    .sub-button {
+      background-color: #99ff99;
+      color: #1C1C1C;
+      font-size: 1em;
+      font-weight: bold;
+      padding: 10px 20px;
+      margin: 8px 12px;
+      border-radius: 10px;
+      display: block;
+    }
+    table {
+      width: 80%;
+      border-collapse: collapse;
+      border-spacing: 0;
+      margin: 0 auto;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 4px solid #33ff33 
+    }
+    th {
+      padding: 10px;
+      border: none;
+    }
+    td {
+      border: none;
+      padding: 7px;
+    }
+    .table-title {
+      background-color: #66FF66;
+      text-align: center !important;
+      font-weight: bold;
+      font-size: 1.3em;
+      color: #342B39;
+    }
+table tr:nth-child(2) label {
+  color: #262626;
+  font-weight: normal;
+}
+    .furniture-cell {
+      background-color: #E8F7E5;
+      text-align: left;
+      vertical-align: top;
+    }
+    .furniture-cell label {
+      color: #262626;
+    }
+    .highlight-label {
+      color: #3FFF48;
+    }
+    .gray-label {
+      color: #BFBFBF;
+      font-size: 0.9em;
+      margin-left: 30px;
+    }
+    .signal-row {
+      background-color: #E8F7E5;
+      text-align: center !important;
+    }
+    .signal-label {
+      color: #B66A6A;
+      text-align: center !important;
+    }
+    .signal-note {
+      color: #AB8787;
+    }
+    .result-table {
+      width: 85%;
+      margin: 8px auto;
+      border: 4px solid #33ff33;
+      border-radius: 12px;
+      table-layout: fixed;
+    }
+    .result-table th {
+      background-color: #3FFF48;
+      color: #262626;
+      text-align: right;
+      padding: 10px;
+      font-size: 1.2em;
+    }
+  .result-table th.center-text {
+    background-color: transparent !important;
+    font-size: 1.1em; 
+    color: #95EB97 !important;
+  }
+    .result-table td {
+      background-color: none;
+      padding: 10px;
+    }
+    .center-text {
+      text-align: center !important;
+      color: #95EB97;
+    }
+.result-table th:first-child,
+.result-table td:first-child {
+  width: 54%;
+}
+.result-table th:last-child,
+.result-table td:last-child {
+  width: 46%;
+}
+.result-table tr:nth-child(2) td,
+.result-table tr:nth-child(3) td,
+.result-table tr:nth-child(4) td {
+  text-align: center;
+}
+
+  .result-table tr:nth-child(2) td .dollar-label,
+  .result-table tr:nth-child(3) td .dollar-label,
+  .result-table tr:nth-child(4) td .dollar-label {
+    color: #9FFFA4;
+  }
+  .result-table tr:nth-child(2) td:nth-child(2),
+  .result-table tr:nth-child(3) td:nth-child(2),
+  .result-table tr:nth-child(4) td:nth-child(2) {
+    background-color: #E8F7E5;
+  }
+
+.result-table td:nth-child(2) .dollar-label {
+  color: #7F7F7F !important;
+}
+
+    .value-placeholder {
+      font-weight: bold;
+      color: white;
+      font-size: 1.2em;
+    }
+    .value-placeholder-black {
+      font-weight: bold;
+      color: black;
+      font-size: 1.2em;
+    }
+    .signal-row {
+      border-top: 3px solid #E8F7E5;
+      padding : 40px;
+      text-align: center;
+    }
+  input#shiploot {
+    margin-top: 14px;
+    width: 20%;
+  }
+    #currentSession {
+      color: #3FFF48;
+      font-weight: bold;
+      margin-left: 10px;
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+<fieldset>
+     <legend>다음 할당량 예측</legend>
+
+    <label for="quotaInput" class="left-gap">현재 할당량 :&nbsp;</label>
+    <input type="number" id="quotaInput" min="1" required />
+
+    <br /><br />
+    <label class="left-gap">현재 세션 :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<span id="currentSession">
+  <span id="sessionNumber" style="color: white; font-weight: bold; font-size: 1.2em; margin-right: 6px;"></span>
+  <span class="highlight-label">주차</span>
+</span>
+    <label class="gray-label">※ 세션 예측 정확도 :</label>
+    <span id="confidenceDisplay"></span>
+
+    <br /><br />
+
+    <table style="border: 4px solid #33ff33; border-radius: 10px;">
+      <tr class="table-title">
+        <td colspan="2">함선 가구 배치 (<span style="color:#646464">행운</span>)</td>
+      </tr>
+      <tr>
+        <td class="furniture-cell">
+          <input type="checkbox" id="item1"> <label for="item1">디스코 볼</label><br>
+          <input type="checkbox" id="item2"> <label for="item2">텔레비전</label><br>
+          <input type="checkbox" id="item3"> <label for="item3">전기 의자</label><br>
+          <input type="checkbox" id="item4"> <label for="item4">샤워부스</label><br>
+          <input type="checkbox" id="item5"> <label for="item5">잭오랜턴</label><br>
+          <input type="checkbox" id="item6"> <label for="item6">변기</label><br>
+          <input type="checkbox" id="item7"> <label for="item7">전자레인지</label><br>
+          <input type="checkbox" id="item8"> <label for="item8">냉장고</label><br>
+          <input type="checkbox" id="item9"> <label for="item9">소파</label><br>
+          <input type="checkbox" id="item10"> <label for="item10">개집</label><br>
+        </td>
+        <td class="furniture-cell">
+          <input type="checkbox" id="item11"> <label for="item11">금붕어</label><br>
+          <input type="checkbox" id="item12"> <label for="item12">고전 영화</label><br>
+          <input type="checkbox" id="item13"> <label for="item13">로맨틱한 테이블</label><br>
+          <input type="checkbox" id="item14"> <label for="item14">레코드 플레이어</label><br>
+          <input type="checkbox" id="item15"> <label for="item15">아늑한 조명</label><br>
+          <input type="checkbox" id="item16"> <label for="item16">테이블</label><br>
+          <input type="checkbox" id="item17"> <label for="item17">역방향 순간이동기</label><br>
+          <input type="checkbox" id="item18"> <label for="item18">웰컴매트</label><br>
+          <input type="checkbox" id="item19"> <label for="item19">파자마 인형</label><br>
+          <input type="checkbox" id="item20"> <label for="item20">시끄러운 경적</label><br>
+        </td>
+      </tr>
+      <tr class="signal-row">
+        <td colspan="2">
+          <input type="checkbox" id="item21">
+          <label for="item21" class="signal-label">신호 해석기 <span class="signal-note">(행운 감소)&nbsp;&nbsp;&nbsp;</span></label>
+        </td>
+      </tr>
+    </table>
+
+    <br>
+    <div style="text-align: center; margin-top: 2px;">
+       <button id="predictBtn">예측</button>
+       <div style="display:inline-block; vertical-align: top; margin-left: 10px;">
+          <label for="shiploot">Shiploot :</label>
+          <input type="number" id="shiploot" style="width: 80px;">
+          <label>$</label>
+          <button class="sub-button" id="collectBtn">수집 요구량 계산</button>
+       </div>
+   </div>
+    <br><br>
+    <table class="result-table">
+      <tr>
+        <th>다음 할당량&nbsp;&nbsp; </th>
+        <th class="center-text">다음주 요구치 일평균</th>
+      </tr>
+     <tr>
+  <td>최소&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;<span class="value-placeholder">-</span> <span class="dollar-label">&nbsp;&nbsp;&nbsp;$</span></td>
+  <td><span class="dollar-label">매일&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      <span class="value-placeholder-black" id="dailyMin">-</span>
+      <span class="dollar-label">&nbsp;&nbsp;&nbsp;$</span></td>
+</tr>
+<tr>
+  <td>평균&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;<span class="value-placeholder">-</span> <span class="dollar-label">&nbsp;&nbsp;&nbsp;$</span></td>
+  <td><span class="dollar-label">매일&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      <span class="value-placeholder-black" id="dailyAvg">-</span>
+      <span class="dollar-label">&nbsp;&nbsp;&nbsp;$</span></td>
+</tr>
+<tr>
+  <td>최대&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;<span class="value-placeholder">-</span> <span class="dollar-label">&nbsp;&nbsp;&nbsp;$</span></td>
+  <td><span class="dollar-label">매일&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      <span class="value-placeholder-black" id="dailyMax">-</span>
+      <span class="dollar-label">&nbsp;&nbsp;&nbsp;$</span></td>
+</tr>
+    </table>
+  </fieldset>
+
+<script>
+const quotaInput = document.getElementById('quotaInput');
+const shiplootInput = document.getElementById('shiploot');  // 함선 보유 가치 입력 칸
+const predictBtn = document.getElementById('predictBtn');
+const collectBtn = document.getElementById('collectBtn');
+
+const sessionNumberElem = document.getElementById('sessionNumber');
+const confidenceDisplay = document.getElementById('confidenceDisplay');
+
+const nextMinElem = document.getElementById('nextMin');
+const nextAvgElem = document.getElementById('nextAvg');
+const nextMaxElem = document.getElementById('nextMax');
+
+const dailyMinElem = document.getElementById('dailyMin');
+const dailyAvgElem = document.getElementById('dailyAvg');
+const dailyMaxElem = document.getElementById('dailyMax');
+
+let currentSession = null;    // 현재 예측된 세션 번호 (1,2,...)
+let currentConfidence = null; // 현재 예측된 정확도
+
+let currentQuota = null;      // quotaInput 숫자값
+let currentNextRange = null;  // {min, avg, max} 다음 할당량 범위 (수동 예측 시 업데이트)
+let currentShiploot = null;   // shiploot 숫자값
+
+function clearNextQuotaRange() {
+  nextMinElem.textContent = '';
+  nextAvgElem.textContent = '';
+  nextMaxElem.textContent = '';
+  currentNextRange = null;
+}
+
+function clearDailyRequirement() {
+  dailyMinElem.textContent = '';
+  dailyAvgElem.textContent = '';
+  dailyMaxElem.textContent = '';
+}
+
+function displayResult(sessionNumber, confidence) {
+  // sessionNumber가 1,2 일 때 +1 안함, 3 이상일 땐 +1
+  if (sessionNumber === 1 || sessionNumber === 2) {
+    sessionNumberElem.textContent = sessionNumber;
+  } else {
+    sessionNumberElem.textContent = sessionNumber + 1;
+  }
+  confidenceDisplay.textContent = `${confidence}%`;
+  
+  // 색상 설정
+  let color = '#9c7c7c';
+  if (confidence === 100) color = '#229944';
+  else if (confidence >= 95) color = '#679d2e';
+  else if (confidence >= 87) color = '#ca801f';
+  else if (confidence >= 70) color = '#9f4b2c';
+  else if (confidence <= 35) color = '#9c7c7c';
+  confidenceDisplay.style.color = color;
+
+  currentSession = sessionNumber;
+  currentConfidence = confidence;
+}
+
+function predictSession() {
+  const rawValue = quotaInput.value.trim();
+  
+  if (rawValue === '') {
+    sessionNumberElem.textContent = '주차';
+    confidenceDisplay.textContent = '';
+    confidenceDisplay.style.color = '';
+    currentSession = null;
+    currentConfidence = null;
+    currentQuota = null;
+
+    clearNextQuotaRange();
+    clearDailyRequirement();
+    return;
+  }
+  
+  if (!/^\d+$/.test(rawValue)) {
+    alert('❌ 현재 할당량을 정확히 입력하세요.');
+    clearNextQuotaRange();
+    clearDailyRequirement();
+    return;
+  }
+  
+  const inputQuota = parseInt(rawValue, 10);
+  if (inputQuota < 1) {
+    alert('❌ 현재 할당량을 정확히 입력하세요.');
+    clearNextQuotaRange();
+    clearDailyRequirement();
+    return;
+  }
+
+  currentQuota = inputQuota;
+
+  // 예외처리 (130, 181~243, 131~181 오류)
+  if (inputQuota === 130) {
+    displayResult(1, 100);
+    clearNextQuotaRange();
+    clearDailyRequirement();
+    return;
+  }
+  if (inputQuota > 181 && inputQuota <= 243) {
+    displayResult(2, 100);
+    clearNextQuotaRange();
+    clearDailyRequirement();
+    return;
+  }
+  if (inputQuota <= 181 && inputQuota > 130) {
+    alert('❌ 불가능한 세션 할당량 수치입니다.');
+    clearNextQuotaRange();
+    clearDailyRequirement();
+    return;
+  }
+  if (inputQuota < 130) {
+    alert('❌ 불가능한 세션 할당량 수치입니다.');
+    clearNextQuotaRange();
+    clearDailyRequirement();
+    return;
+  }
+  
+  // 일반 예측 루프
+  let quota = 130;
+  let runs = 1;
+  while (true) {
+    const avgIncrease = 100 * (1 + Math.pow(runs, 2) / 16);
+    const minQuota = quota + Math.floor(avgIncrease * (1 - 0.503));
+    const maxQuota = quota + Math.floor(avgIncrease * (1 + 0.503));
+    if (inputQuota >= minQuota && inputQuota <= maxQuota) break;
+    quota += Math.floor(avgIncrease);
+    runs++;
+    if (runs > 50) {
+      alert('❌ 할당량이 너무 커서 세션을 예측할 수 없습니다.');
+      clearNextQuotaRange();
+      clearDailyRequirement();
+      return;
+    }
+  }
+
+
+  // 정확도 계산
+  const avgIncrease = 100 * (1 + Math.pow(runs, 2) / 16);
+  const minQuota = quota + Math.floor(avgIncrease * (1 - 0.503));
+  const maxQuota = quota + Math.floor(avgIncrease * (1 + 0.503));
+  const center = (minQuota + maxQuota) / 2;
+  const rangeHalf = (maxQuota - minQuota) / 2;
+  const deviation = Math.abs(inputQuota - center);
+  const normalizedDeviation = deviation / rangeHalf;
+
+  let rawConfidence = Math.round((1 - normalizedDeviation) * 100);
+  let guaranteed = 0;
+  if (normalizedDeviation <= 0.01) guaranteed = 99;
+  else if (normalizedDeviation <= 0.05) guaranteed = 98;
+  else if (normalizedDeviation <= 0.1) guaranteed = 97;
+  else if (normalizedDeviation <= 0.2) guaranteed = 95;
+  else if (normalizedDeviation <= 0.3) guaranteed = 90;
+  else if (normalizedDeviation <= 0.35) guaranteed = 87;
+  else if (normalizedDeviation <= 0.4) guaranteed = 70;
+
+  const confidence = Math.max(rawConfidence, guaranteed);
+  displayResult(runs, confidence);
+
+  clearNextQuotaRange();
+  clearDailyRequirement();
+}
+
+// 예측 버튼 클릭 시 다음 할당량 범위 계산
+predictBtn.addEventListener('click', () => {
+  if (currentQuota === null || currentSession === null) {
+    alert('❌ 먼저 현재 할당량을 정확히 입력하고 예측을 완료하세요.');
+    return;
+  }
+
+
+  // 다음 할당량 계산 
+  const nextRun = currentSession + 1;
+  const nextAvgIncrease = 100 * (1 + Math.pow(nextRun, 2) / 16);
+  const nextMin = currentQuota + Math.floor(nextAvgIncrease * (1 - 0.503));
+  const nextAvg = currentQuota + Math.floor(nextAvgIncrease);
+  const nextMax = currentQuota + Math.floor(nextAvgIncrease * (1 + 0.503));
+  
+  // 테이블 값 업데이트
+  document.querySelectorAll('.result-table .value-placeholder')[0].textContent = nextMin;
+  document.querySelectorAll('.result-table .value-placeholder')[1].textContent = nextAvg;
+  document.querySelectorAll('.result-table .value-placeholder')[2].textContent = nextMax;
+
+collectBtn.addEventListener('click', () => {
+  if (!currentNextRange) {
+    alert('먼저 다음 할당량 예측을 진행하세요.');
+    return;
+  }
+  const shiplootRaw = shiplootInput.value.trim();
+  if (shiplootRaw === '' || isNaN(shiplootRaw)) {
+    alert('Shiploot 값을 올바르게 입력하세요.');
+    return;
+  }
+  const shiploot = parseInt(shiplootRaw, 10);
+  currentShiploot = shiploot;
+
+  // 최소, 평균, 최대에서 shiploot 빼고 3으로 나눈 뒤 올려서 자연수화
+  const dailyMin = Math.ceil((currentNextRange.min - shiploot) / 3);
+  const dailyAvg = Math.ceil((currentNextRange.avg - shiploot) / 3);
+  const dailyMax = Math.ceil((currentNextRange.max - shiploot) / 3);
+
+  dailyMinElem.textContent = dailyMin > 0 ? dailyMin : 0;
+  dailyAvgElem.textContent = dailyAvg > 0 ? dailyAvg : 0;
+  dailyMaxElem.textContent = dailyMax > 0 ? dailyMax : 0;
+});
+
+
+function calculateDailyRequirement() {
+  let shipLoot = shipLootInput.trim() === "" ? 0 : Number(shipLootInput); 
+
+  const shiplootRaw = document.getElementById('shiploot').value.trim();
+  if (shiplootRaw === '') {
+    alert("❌ Shiploot 값을 입력하세요.");
+    return;
+  }
+
+  const shiplootValue = parseFloat(shiplootRaw);
+    if (!Number.isInteger(shipLoot) || shipLoot < 0) {
+        return { error: '❌ 함선 보유 가치가 잘못 입력되었습니다.' };
+    }
+    const ceilDiv = (a, b) => Math.ceil(a / b);
+
+    return {
+        dailyMin: ceilDiv(minQuota - shipLoot, 3),
+        dailyAvg: ceilDiv(avgQuota - shipLoot, 3),
+        dailyMax: ceilDiv(maxQuota - shipLoot, 3),
+        error: null
+    };
+}
+
+
+document.querySelectorAll('.result-table .value-placeholder-black')[0].textContent = calcDaily(nextMin);
+document.querySelectorAll('.result-table .value-placeholder-black')[1].textContent = calcDaily(nextAvg);
+document.querySelectorAll('.result-table .value-placeholder-black')[2].textContent = calcDaily(nextMax);
+
+  nextMinElem.textContent = nextMin;
+  nextAvgElem.textContent = nextAvg;
+  nextMaxElem.textContent = nextMax;
+
+  clearDailyRequirement();
+});
+
+// '수집 요구량 계산' 클릭 시 일평균 요구치 계산
+collectBtn.addEventListener('click', () => {
+  const rawShiploot = shiplootInput.value.trim();
+
+  if (currentNextRange === null) {
+    alert('❌ 다음 할당량 범위가 먼저 계산되어야 합니다.');
+    return;
+  }
+
+  if (!/^\d+$/.test(rawShiploot)) {
+    alert('❌ 함선 내 보유 가치를 정확하게 입력해주세요.');
+    clearDailyRequirement();
+    return;
+  }
+
+  const shiploot = parseInt(rawShiploot, 10);
+  currentShiploot = shiploot;
+
+  // 일평균 요구치 = (다음 할당량 범위 - shiploot) / 3, 올림 후 양수
+  function calcDaily(val) {
+    return Math.max(Math.ceil((val - shiploot) / 3), 0);
+  }
+
+  dailyMinElem.textContent = calcDaily(currentNextRange.min);
+  dailyAvgElem.textContent = calcDaily(currentNextRange.avg);
+  dailyMaxElem.textContent = calcDaily(currentNextRange.max);
+});
+
+    quotaInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        predictSession();
+        quotaInput.blur();
+      }
+    });
+
+    quotaInput.addEventListener('blur', () => {
+      predictSession();
+    });
+
+// 현재할당량 및 함선 가치(shiploot) 변경 시 다음 할당량 및 일평균 요구치 초기화
+quotaInput.addEventListener('input', () => {
+  clearNextQuotaRange();
+  clearDailyRequirement();
+  predictSession();
+});
+shiplootInput.addEventListener('input', () => {
+  clearDailyRequirement();
+});
+
+</script>
+
+
+</body>
+</html>
